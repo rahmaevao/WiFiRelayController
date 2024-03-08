@@ -1,28 +1,25 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
-
-
-const char* ssid = "Keenetic-6666";
-const char* password = "NRnxucXC";
+#include "wifi.h"
 
 ESP8266WebServer server(80);
 
 uint8_t relayPin = LED_BUILTIN;
 bool relayStatus = LOW;
 
-void setup() {
+void setup()
+{
   Serial.begin(115200);
   delay(100);
   pinMode(relayPin, OUTPUT);
 
-  Serial.println("Connecting to ");
-  Serial.println(ssid);
-
   // подключиться к вашей локальной wi-fi сети
-  WiFi.begin(ssid, password);
+  WiFi.setHostname("WiFiRelay");
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
   // проверить, подключился ли wi-fi модуль к wi-fi сети
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED)
+  {
     delay(1000);
     Serial.print(".");
   }
@@ -40,7 +37,8 @@ void setup() {
   Serial.println("HTTP server started");
 }
 
-void loop() {
+void loop()
+{
   server.handleClient();
 
   if (relayStatus)
@@ -49,7 +47,8 @@ void loop() {
     digitalWrite(relayPin, HIGH);
 }
 
-void handle_OnConnect() {
+void handle_OnConnect()
+{
   Serial.print("Relay status: ");
   if (relayStatus)
     Serial.print("ON");
@@ -59,23 +58,27 @@ void handle_OnConnect() {
   server.send(200, "text/html", SendHTML(relayStatus));
 }
 
-void handle_relay_on() {
+void handle_relay_on()
+{
   relayStatus = HIGH;
   Serial.println("Relay status: ON");
   server.send(200, "text/html", SendHTML(true));
 }
 
-void handle_relay_off() {
+void handle_relay_off()
+{
   relayStatus = LOW;
   Serial.println("Relay status: OFF");
   server.send(200, "text/html", SendHTML(false));
 }
 
-void handle_NotFound() {
+void handle_NotFound()
+{
   server.send(404, "text/plain", "Not found");
 }
 
-String SendHTML(uint8_t relayStatus) {
+String SendHTML(uint8_t relayStatus)
+{
   String ptr = "<!DOCTYPE html> <html>\n";
   ptr += "<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
   ptr += "<title>WiFi relay</title>\n";
